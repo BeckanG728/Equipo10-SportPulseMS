@@ -1,0 +1,98 @@
+version: '3.8'
+services:
+  ms-gateway:
+    build: ./ms-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      AUTH_SERVICE_URL: http://ms-auth:8081
+      LEAGUES_SERVICE_URL: http://ms-leagues:8082
+      TEAMS_SERVICE_URL: http://ms-teams:8083
+      FIXTURES_SERVICE_URL: http://ms-fixtures:8085
+      STANDINGS_SERVICE_URL: http://ms-standings:8086
+      NOTIFICATIONS_SERVICE_URL: http://ms-notifications:8088
+      DASHBOARD_SERVICE_URL: http://ms-dashboard:8089
+  postgres-auth:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_AUTH_DB}
+      POSTGRES_USER: ${POSTGRES_AUTH_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+    ports:
+      - "5433:5432"
+  ms-auth:
+    build: ./ms-auth
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres-auth
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/${POSTGRES_AUTH_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_AUTH_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+  ms-leagues:
+    build: ./ms-leagues
+    ports:
+      - "8082:8082"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+  ms-teams:
+    build: ./ms-teams
+    ports:
+      - "8083:8083"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+  ms-fixtures:
+    build: ./ms-fixtures
+    ports:
+      - "8085:8085"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      TEAMS_SERVICE_URL: http://ms-teams:8083
+  ms-standings:
+    build: ./ms-standings
+    ports:
+      - "8086:8086"
+    environment:
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      TEAMS_SERVICE_URL: http://ms-teams:8083
+  postgres-notifications:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: ${POSTGRES_NOTIFICATIONS_DB}
+      POSTGRES_USER: ${POSTGRES_NOTIFICATIONS_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_NOTIFICATIONS_PASSWORD}
+    ports:
+      - "5434:5432"
+  ms-notifications:
+    build: ./ms-notifications
+    ports:
+      - "8088:8088"
+    depends_on:
+      - postgres-notifications
+      - ms-fixtures
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-notifications:5432/${POSTGRES_NOTIFICATIONS_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_NOTIFICATIONS_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_NOTIFICATIONS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      FIXTURES_SERVICE_URL: http://ms-fixtures:8085
+  ms-dashboard:
+    build: ./ms-dashboard
+    ports:
+      - "8089:8089"
+    depends_on:
+      - ms-fixtures
+      - ms-standings
+      - ms-leagues
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      FIXTURES_SERVICE_URL: http://ms-fixtures:8085
+      STANDINGS_SERVICE_URL: http://ms-standings:8086
+      LEAGUES_SERVICE_URL: http://ms-leagues:8082
