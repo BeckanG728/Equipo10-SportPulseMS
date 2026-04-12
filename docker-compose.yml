@@ -1,6 +1,7 @@
 services:
   ms-gateway:
     build: ./ms-gateway
+    image: ms-gateway
     ports:
       - "8080:8080"
     environment:
@@ -19,8 +20,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD}
     ports:
       - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
   ms-auth:
     build: ./ms-auth
+    image: ms-auth
     ports:
       - "8081:8081"
     depends_on:
@@ -33,6 +37,7 @@ services:
       JWT_EXPIRATION: ${JWT_EXPIRATION}
   ms-leagues:
     build: ./ms-leagues
+    image: ms-leagues
     ports:
       - "8082:8082"
     environment:
@@ -40,6 +45,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
   ms-teams:
     build: ./ms-teams
+    image: ms-teams
     ports:
       - "8083:8083"
     environment:
@@ -47,6 +53,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
   ms-fixtures:
     build: ./ms-fixtures
+    image: ms-fixtures
     ports:
       - "8085:8085"
     environment:
@@ -55,6 +62,7 @@ services:
       TEAMS_SERVICE_URL: http://ms-teams:8083
   ms-standings:
     build: ./ms-standings
+    image: ms-standings
     ports:
       - "8086:8086"
     environment:
@@ -69,8 +77,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_NOTIFICATIONS_PASSWORD}
     ports:
       - "5434:5432"
+    volumes:
+      - postgres_notifications_data:/var/lib/postgresql/data
   ms-notifications:
     build: ./ms-notifications
+    image: ms-notifications
     ports:
       - "8088:8088"
     depends_on:
@@ -84,6 +95,7 @@ services:
       FIXTURES_SERVICE_URL: http://ms-fixtures:8085
   ms-dashboard:
     build: ./ms-dashboard
+    image: ms-dashboard
     ports:
       - "8089:8089"
     depends_on:
@@ -95,3 +107,6 @@ services:
       FIXTURES_SERVICE_URL: http://ms-fixtures:8085
       STANDINGS_SERVICE_URL: http://ms-standings:8086
       LEAGUES_SERVICE_URL: http://ms-leagues:8082
+volumes:
+  postgres_auth_data:
+  postgres_notifications_data:
