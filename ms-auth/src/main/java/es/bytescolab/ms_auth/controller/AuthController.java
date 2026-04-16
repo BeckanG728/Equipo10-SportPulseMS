@@ -1,8 +1,9 @@
 package es.bytescolab.ms_auth.controller;
 
+import es.bytescolab.ms_auth.dto.request.LoginRequest;
 import es.bytescolab.ms_auth.dto.request.RegisterRequest;
 import es.bytescolab.ms_auth.dto.response.RegisterResponse;
-import es.bytescolab.ms_auth.service.UserService;
+import es.bytescolab.ms_auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,20 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(
             @Valid
             @RequestBody RegisterRequest request) {
-        RegisterResponse response = userService.register(request);
+        RegisterResponse response = authService.register(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login() {
-
-        return null;
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 
 }
