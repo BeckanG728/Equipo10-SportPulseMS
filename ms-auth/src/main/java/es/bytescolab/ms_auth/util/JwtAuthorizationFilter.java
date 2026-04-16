@@ -43,14 +43,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Extraer username
-        String username = jwtUtil.extractUsername(token);
+        // Extraer email del token
+        String email = jwtUtil.extractEmail(token);
 
 
         // Condición ajustada
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Pasar username
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
 
             if (!jwtUtil.isExpired(token)) {
                 UsernamePasswordAuthenticationToken authToken =

@@ -26,10 +26,9 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
-    public String generateToken(UUID userId, String username, String email, UserRole role) {
+    public String generateToken(UUID userId, String email, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("username", username);
         claims.put("email", email);
         claims.put("role", role.name());
 
@@ -44,20 +43,18 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Extraer username de token
-    public String extractUsername(String token) {
-        return getClaims(token).getSubject();
-    }
-
     public String extractUserId(String token) {
         return getClaims(token).get("userId", String.class);
+    }
+
+    public String extractEmail(String token) {
+        return getClaims(token).get("email", String.class);
     }
 
     public String extractRole(String token) {
         return getClaims(token).get("role", String.class);
     }
 
-    // Validar token
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -70,7 +67,6 @@ public class JwtUtil {
         }
     }
 
-    // Validr expiracion
     public boolean isExpired(String token) {
         return getClaims(token)
                 .getExpiration()

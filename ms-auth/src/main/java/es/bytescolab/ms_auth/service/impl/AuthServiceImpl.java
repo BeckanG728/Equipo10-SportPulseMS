@@ -2,6 +2,7 @@ package es.bytescolab.ms_auth.service.impl;
 
 import es.bytescolab.ms_auth.dto.request.LoginRequest;
 import es.bytescolab.ms_auth.dto.request.RegisterRequest;
+import es.bytescolab.ms_auth.dto.response.AuthResponse;
 import es.bytescolab.ms_auth.dto.response.RegisterResponse;
 import es.bytescolab.ms_auth.entity.User;
 import es.bytescolab.ms_auth.exception.InvalidCredentialsException;
@@ -11,10 +12,14 @@ import es.bytescolab.ms_auth.repository.UserRepository;
 import es.bytescolab.ms_auth.service.AuthService;
 import es.bytescolab.ms_auth.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,9 +28,14 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMappper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Value("${jwt.expiration}")
+    private Long expiration;
+
     @Override
+    @Transactional
     public RegisterResponse register(RegisterRequest request) {
         User user = userMapper.toEntity(request);
 
@@ -50,15 +60,31 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Map<String, String> login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
+    @Transactional(readOnly = true)
+    public AuthResponse login(LoginRequest request) {
+        Authentication authentication;
 
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new InvalidCredentialsException("Credenciales inválidas");
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.password()
+                    )
+            );
+        } catch (AuthenticationException ex) {
+            throw new InvalidCredentialsException("Email o contraseña incorrectos");
         }
 
-        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getEmail(), user.getRole());
-        return Map.of("token", token);
+        // Aqui se reutiliza el usuario autenticado (NO se hace otra query)
+        User user = (User) authentication.getPrincipal();
+
+        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
+
+        return AuthResponse.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .expiresIn(expiration / 1000)
+                .userId(user.getId().toString())
+                .build();
     }
 }

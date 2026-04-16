@@ -30,8 +30,8 @@ public class AuthenticadedUserProvider {
         return UUID.fromString(jwtUtil.extractUserId(extractToken()));
     }
 
-    public String getCurrentUsername() {
-        return jwtUtil.extractUsername(extractToken());
+    public String getCurrentEmail() {
+        return jwtUtil.extractEmail(extractToken());
     }
 
     public String getCurrentRole() {
