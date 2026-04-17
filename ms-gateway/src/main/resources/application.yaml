@@ -1,3 +1,143 @@
 spring:
   application:
     name: ms-gateway
+  cloud:
+    gateway:
+      routes:
+        # Rutas públicas - SIN autenticación
+        - id: ms-auth-public
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/login,/api/auth/register
+          metadata:
+            public: true
+
+        # Rutas protegidas - CON autenticación JWT
+        - id: ms-leagues
+          uri: ${LEAGUES_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/leagues/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: ms-leagues
+          metadata:
+            public: false
+
+        - id: ms-teams
+          uri: ${TEAMS_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/teams/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: ms-teams
+          metadata:
+            public: false
+
+        - id: ms-fixtures
+          uri: ${FIXTURES_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/fixtures/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: ms-fixtures
+          metadata:
+            public: false
+
+        - id: ms-standings
+          uri: ${STANDINGS_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/standings/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: ms-standings
+          metadata:
+            public: false
+
+        - id: ms-notifications
+          uri: ${NOTIFICATIONS_SERVICE_URL:http://localhost:8088}
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: ms-notifications
+          metadata:
+            public: false
+
+        - id: ms-dashboard
+          uri: ${DASHBOARD_SERVICE_URL:http://localhost:8089}
+          predicates:
+            - Path=/api/dashboard/**
+          filters:
+            - JwtAuthentication
+            - name: CircuitBreaker
+              args:
+                name: ms-dashboard
+          metadata:
+            public: false
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: true
+        recordExceptions:
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+          - org.springframework.cloud.gateway.support.ServiceUnavailableException
+    instances:
+      ms-leagues:
+        baseConfig: default
+      ms-teams:
+        baseConfig: default
+      ms-fixtures:
+        baseConfig: default
+      ms-standings:
+        baseConfig: default
+      ms-notifications:
+        baseConfig: default
+      ms-dashboard:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 5s
+    instances:
+      ms-leagues:
+        baseConfig: default
+      ms-teams:
+        baseConfig: default
+      ms-fixtures:
+        baseConfig: default
+      ms-standings:
+        baseConfig: default
+      ms-notifications:
+        baseConfig: default
+      ms-dashboard:
+        baseConfig: default
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    es.bytescolab.ms_gateway: DEBUG
+    io.github.resilience4j: DEBUG
+
+jwt:
+  secret: ${JWT_SECRET}
