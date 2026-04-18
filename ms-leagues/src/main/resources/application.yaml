@@ -1,3 +1,10 @@
 spring:
   application:
     name: ms-leagues
+
+server:
+  port: 8082
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}

@@ -12,6 +12,7 @@ services:
       STANDINGS_SERVICE_URL: http://ms-standings:8086
       NOTIFICATIONS_SERVICE_URL: http://ms-notifications:8088
       DASHBOARD_SERVICE_URL: http://ms-dashboard:8089
+      JWT_SECRET: ${JWT_SECRET}
   postgres-auth:
     image: postgres:15
     environment:
