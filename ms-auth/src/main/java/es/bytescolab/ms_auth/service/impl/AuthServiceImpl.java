@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.toEntity(request);
 
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new UserAlreadyExists("Ya existe un usuario con este username");
+            throw new UserAlreadyExists("Ya existe un usuario con este usuario");
         }
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -78,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
         // Aqui se reutiliza el usuario autenticado (NO se hace otra query)
         User user = (User) authentication.getPrincipal();
 
-        String token = jwtUtil.generateToken(user.getId(), user.getEmail(), user.getRole());
+        String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
 
         return AuthResponse.builder()
                 .token(token)

@@ -26,10 +26,10 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
-    public String generateToken(UUID userId, String email, UserRole role) {
+    public String generateToken(UUID userId, String username, UserRole role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
-        claims.put("email", email);
+        claims.put("username", username);
         claims.put("role", role.name());
 
         Date now = new Date(System.currentTimeMillis());
