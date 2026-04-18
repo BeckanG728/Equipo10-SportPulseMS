@@ -3,11 +3,11 @@ spring:
     name: ms-gateway
   cloud:
     gateway:
-      httpclient:
-        connect-timeout: 2000
-        response-timeout: 3s
       server:
         webflux:
+          httpclient:
+            connect-timeout: 2000
+            response-timeout: 3s
           routes:
             # Rutas públicas - SIN autenticación
             - id: ms-auth-public
