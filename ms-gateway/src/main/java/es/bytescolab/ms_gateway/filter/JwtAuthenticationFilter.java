@@ -31,6 +31,11 @@ public class JwtAuthenticationFilter
 
             String authHeader = request.getHeaders().getFirst("Authorization");
 
+            if (authHeader == null) {
+                log.warn("Formato de Authorization inválido en ruta: {}", path);
+                return Mono.error(new AuthenticationException("Sin header Autorization"));
+            }
+
             if (!authHeader.startsWith("Bearer ")) {
                 log.warn("Formato de Authorization inválido en ruta: {}", path);
                 return Mono.error(new AuthenticationException("Formato de jwt invalido. Bearer <token>"));
