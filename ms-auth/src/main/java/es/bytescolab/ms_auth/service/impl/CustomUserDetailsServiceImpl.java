@@ -1,15 +1,17 @@
 package es.bytescolab.ms_auth.service.impl;
 
 import es.bytescolab.ms_auth.repository.UserRepository;
+import es.bytescolab.ms_auth.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -18,4 +20,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }
+
+    @Override
+    public UserDetails loadUserByUserID(UUID userID) throws UsernameNotFoundException {
+        return userRepository.findById(userID)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+    }
+
 }
