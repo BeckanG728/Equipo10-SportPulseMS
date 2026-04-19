@@ -1,5 +1,6 @@
 package es.bytescolab.ms_auth.util;
 
+import es.bytescolab.ms_auth.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,19 +9,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -43,14 +44,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Extraer email del token
-        String email = jwtUtil.extractEmail(token);
+        // Subject del token (userID)
+        UUID userId = jwtUtil.extractUserId(token);
 
 
         // Condición ajustada
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Pasar username
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // Pasar userId
+            UserDetails userDetails = this.userDetailsService.loadByUserID(userId);
 
             if (!jwtUtil.isExpired(token)) {
                 UsernamePasswordAuthenticationToken authToken =
