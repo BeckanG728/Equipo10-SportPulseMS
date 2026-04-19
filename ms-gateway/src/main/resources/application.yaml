@@ -1,6 +1,10 @@
 spring:
   application:
     name: ms-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
   cloud:
     gateway:
       server:
@@ -17,6 +21,9 @@ spring:
               metadata:
                 public: true
               filters:
+                - name: RateLimit
+                  args:
+                    routeId: ms-auth-public
                 - name: CircuitBreaker
                   args:
                     name: ms-auth-public
@@ -28,83 +35,84 @@ spring:
               predicates:
                 - Path=/api/leagues/**
               filters:
-                - JwtAuthentication
+                - JwtGatewayFilter
+                - name: RateLimit
+                  args:
+                    routeId: ms-leagues
                 - name: CircuitBreaker
                   args:
                     name: ms-leagues
                     fallbackUri: forward:/fallback/ms-leagues
-                    statusCodes:
-                      - 500
-                      - 502
-                      - 503
-                      - 504
-              metadata:
-                public: false
 
             - id: ms-teams
               uri: ${TEAMS_SERVICE_URL:http://localhost:8083}
               predicates:
                 - Path=/api/teams/**
               filters:
-                - JwtAuthentication
+                - JwtGatewayFilter
+                - name: RateLimit
+                  args:
+                    routeId: ms-teams
                 - name: CircuitBreaker
                   args:
                     name: ms-teams
                     fallbackUri: forward:/fallback/ms-teams
-              metadata:
-                public: false
 
             - id: ms-fixtures
               uri: ${FIXTURES_SERVICE_URL:http://localhost:8085}
               predicates:
                 - Path=/api/fixtures/**
               filters:
-                - JwtAuthentication
+                - JwtGatewayFilter
+                - name: RateLimit
+                  args:
+                    routeId: ms-fixtures
                 - name: CircuitBreaker
                   args:
                     name: ms-fixtures
                     fallbackUri: forward:/fallback/ms-fixtures
-              metadata:
-                public: false
 
             - id: ms-standings
               uri: ${STANDINGS_SERVICE_URL:http://localhost:8086}
               predicates:
                 - Path=/api/standings/**
               filters:
-                - JwtAuthentication
+                - JwtGatewayFilter
+                - name: RateLimit
+                  args:
+                    routeId: ms-standings
                 - name: CircuitBreaker
                   args:
                     name: ms-standings
                     fallbackUri: forward:/fallback/ms-standings
-              metadata:
-                public: false
 
             - id: ms-notifications
               uri: ${NOTIFICATIONS_SERVICE_URL:http://localhost:8088}
               predicates:
                 - Path=/api/notifications/**
               filters:
-                - JwtAuthentication
+                - JwtGatewayFilter
+                - name: RateLimit
+                  args:
+                    routeId: ms-notifications
                 - name: CircuitBreaker
                   args:
                     name: ms-notifications
                     fallbackUri: forward:/fallback/ms-notifications
-              metadata:
-                public: false
 
             - id: ms-dashboard
               uri: ${DASHBOARD_SERVICE_URL:http://localhost:8089}
               predicates:
                 - Path=/api/dashboard/**
               filters:
-                - JwtAuthentication
+                - JwtGatewayFilter
+                - name: RateLimit
+                  args:
+                    routeId: ms-dashboard
                 - name: CircuitBreaker
                   args:
                     name: ms-dashboard
                     fallbackUri: forward:/fallback/ms-dashboard
-              metadata:
-                public: false
 
 resilience4j:
   circuitbreaker:

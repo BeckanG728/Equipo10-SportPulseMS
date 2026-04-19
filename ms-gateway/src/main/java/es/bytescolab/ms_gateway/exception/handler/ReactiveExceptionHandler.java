@@ -34,10 +34,10 @@ public class ReactiveExceptionHandler implements ErrorWebExceptionHandler {
         logError(context, ex, exchange.getRequest().getPath().value());
 
         ErrorResponseDto response = new ErrorResponseDto(
-            context.getErrorCode(),
-            context.getMessage(),
-            context.getMetadata(),
-            Instant.now()
+                context.getErrorCode(),
+                context.getMessage(),
+                context.getMetadata(),
+                Instant.now()
         );
 
         return writeResponse(exchange, context.getStatus(), response);
@@ -56,13 +56,13 @@ public class ReactiveExceptionHandler implements ErrorWebExceptionHandler {
         exchange.getResponse().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
         return Mono.fromCallable(() -> objectMapper.writeValueAsBytes(response))
-            .flatMap(bytes -> {
-                DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
-                return exchange.getResponse().writeWith(Mono.just(buffer));
-            })
-            .onErrorResume(e -> {
-                log.error("Error serializando respuesta de error", e);
-                return exchange.getResponse().setComplete();
-            });
+                .flatMap(bytes -> {
+                    DataBuffer buffer = exchange.getResponse().bufferFactory().wrap(bytes);
+                    return exchange.getResponse().writeWith(Mono.just(buffer));
+                })
+                .onErrorResume(e -> {
+                    log.error("Error serializando respuesta de error", e);
+                    return exchange.getResponse().setComplete();
+                });
     }
 }
