@@ -22,7 +22,7 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
     }
 
     @Override
-    public UserDetails loadByUserID(UUID userID) throws UsernameNotFoundException {
+    public UserDetails loadUserByUserID(UUID userID) throws UsernameNotFoundException {
         return userRepository.findById(userID)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
     }

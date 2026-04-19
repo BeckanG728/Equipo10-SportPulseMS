@@ -51,7 +51,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         // Condición ajustada
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Pasar userId
-            UserDetails userDetails = this.userDetailsService.loadByUserID(userId);
+            UserDetails userDetails = this.userDetailsService.loadUserByUserID(userId);
 
             if (!jwtUtil.isExpired(token)) {
                 UsernamePasswordAuthenticationToken authToken =

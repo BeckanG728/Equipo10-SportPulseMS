@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface CustomUserDetailsService extends UserDetailsService {
 
-    UserDetails loadByUserID(UUID userID) throws UsernameNotFoundException;
+    UserDetails loadUserByUserID(UUID userID) throws UsernameNotFoundException;
 }
