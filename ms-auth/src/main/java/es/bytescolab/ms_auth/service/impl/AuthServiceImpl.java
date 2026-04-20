@@ -4,6 +4,7 @@ import es.bytescolab.ms_auth.dto.request.LoginRequest;
 import es.bytescolab.ms_auth.dto.request.RegisterRequest;
 import es.bytescolab.ms_auth.dto.response.AuthResponse;
 import es.bytescolab.ms_auth.dto.response.RegisterResponse;
+import es.bytescolab.ms_auth.dto.response.ValidateResponse;
 import es.bytescolab.ms_auth.entity.User;
 import es.bytescolab.ms_auth.exception.InvalidCredentialsException;
 import es.bytescolab.ms_auth.exception.UserAlreadyExists;
@@ -11,6 +12,9 @@ import es.bytescolab.ms_auth.mapper.UserMappper;
 import es.bytescolab.ms_auth.repository.UserRepository;
 import es.bytescolab.ms_auth.service.AuthService;
 import es.bytescolab.ms_auth.util.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -86,5 +90,40 @@ public class AuthServiceImpl implements AuthService {
                 .expiresIn(expiration / 1000)
                 .userId(user.getId().toString())
                 .build();
+    }
+
+    @Override
+    public ValidateResponse validate(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ValidateResponse.builder()
+                    .valid(false)
+                    .error("INVALID_TOKEN")
+                    .message("Token no encontrado o formato inválido")
+                    .build();
+        }
+
+        String token = authorizationHeader.substring(7);
+
+        try {
+            Claims claims = jwtUtil.getClaims(token);
+            return ValidateResponse.builder()
+                    .valid(true)
+                    .userId(claims.getSubject())
+                    .username(claims.get("username", String.class))
+                    .role(claims.get("role", String.class))
+                    .build();
+        } catch (ExpiredJwtException e) {
+            return ValidateResponse.builder()
+                    .valid(false)
+                    .error("TOKEN_EXPIRED")
+                    .message("El token ha expirado")
+                    .build();
+        } catch (JwtException e) {
+            return ValidateResponse.builder()
+                    .valid(false)
+                    .error("INVALID_TOKEN")
+                    .message("Token inválido o firma incorrecta")
+                    .build();
+        }
     }
 }
