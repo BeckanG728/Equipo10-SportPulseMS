@@ -2,12 +2,14 @@ package es.bytescolab.ms_leagues.mapper;
 
 import es.bytescolab.ms_leagues.client.model.LeaguesEntry;
 import es.bytescolab.ms_leagues.client.model.SeasonInfo;
+import es.bytescolab.ms_leagues.dto.response.LeagueDetailResponse;
 import es.bytescolab.ms_leagues.dto.response.LeaguesResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -28,6 +30,39 @@ public class LeaguesMapper {
                 .startDate(season != null ? parseDate(season.start()) : null)
                 .endDate(season != null ? parseDate(season.end()) : null)
                 .build();
+    }
+
+    public LeagueDetailResponse toLeagueDetailResponse(LeaguesEntry entry) {
+        if (entry.league() == null) return null;
+
+        SeasonInfo season = pickCurrentSeason(entry.seasons(), null);
+
+        List<Integer> seasonYears = entry.seasons() == null ? List.of() :
+                entry.seasons().stream()
+                        .map(SeasonInfo::year)
+                        .filter(Objects::nonNull)
+                        .toList();
+
+        return LeagueDetailResponse.builder()
+                .id(entry.league().id())
+                .name(entry.league().name())
+                .type(entry.league().type())
+                .logo(entry.league().logo())
+                .country(entry.country() != null ? entry.country().name() : null)
+                .seasons(seasonYears)
+                .currentSeason(currentSeason(season))
+                .build();
+    }
+
+    // Helpers
+    private LeagueDetailResponse.CurrentSeason currentSeason(SeasonInfo current) {
+        return current == null ? null :
+                LeagueDetailResponse.CurrentSeason.builder()
+                        .year(current.year())
+                        .startDate(parseDate(current.start()))
+                        .endDate(parseDate(current.end()))
+                        .current(current.current())
+                        .build();
     }
 
     private SeasonInfo pickCurrentSeason(List<SeasonInfo> seasons, Integer seasonFilter) {
