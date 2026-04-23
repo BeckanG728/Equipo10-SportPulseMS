@@ -15,4 +15,10 @@ public interface FootballApiClient {
             @RequestParam(value = "country", required = false) String country,
             @RequestParam(value = "season", required = false) Integer season
     );
+
+    @GetMapping("/leagues")
+    ApiResponse getLeagueById(
+            @RequestHeader("x-apisports-key") String apiKey,
+            @RequestParam(value = "id") Integer id
+    );
 }

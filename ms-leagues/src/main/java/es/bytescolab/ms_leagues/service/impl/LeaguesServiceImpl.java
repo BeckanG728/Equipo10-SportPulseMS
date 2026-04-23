@@ -2,8 +2,10 @@ package es.bytescolab.ms_leagues.service.impl;
 
 import es.bytescolab.ms_leagues.client.feign.FootballApiClient;
 import es.bytescolab.ms_leagues.client.model.ApiResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueDetailResponse;
 import es.bytescolab.ms_leagues.dto.response.LeaguesResponse;
 import es.bytescolab.ms_leagues.exception.ExternalApiException;
+import es.bytescolab.ms_leagues.exception.LeagueNotFoundException;
 import es.bytescolab.ms_leagues.exception.NoResultsFoundException;
 import es.bytescolab.ms_leagues.mapper.LeaguesMapper;
 import es.bytescolab.ms_leagues.service.LeaguesService;
@@ -60,5 +62,25 @@ public class LeaguesServiceImpl implements LeaguesService {
 
         log.info("Se obtuvieron {} ligas de API-Football", result.size());
         return result;
+    }
+
+    @Override
+    @Cacheable(value = "leagueDetail", key = "#leagueId")
+    public LeagueDetailResponse getLeagueDetail(Integer leagueId) {
+        log.info("Cache MISS – consultando detalle de liga id={}", leagueId);
+
+        ApiResponse apiResponse;
+        try {
+            apiResponse = footballApiClient.getLeagueById(rapidApiKey, leagueId);
+        } catch (FeignException ex) {
+            log.error("Error al conectar con API-Football: {}", ex.getMessage());
+            throw new ExternalApiException("No se pudo conectar con la API externa", ex);
+        }
+
+        if (apiResponse == null || apiResponse.response() == null || apiResponse.response().isEmpty()) {
+            throw new LeagueNotFoundException("No existe una liga con el ID proporcionado");
+        }
+
+        return leaguesMapper.toLeagueDetailResponse(apiResponse.response().get(0));
     }
 }

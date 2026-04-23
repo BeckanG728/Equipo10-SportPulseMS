@@ -20,6 +20,11 @@ public class GlobalExceptionHandler {
 
     // ── Excepciones personalizadas ───────────────────────────────────────────
 
+    @ExceptionHandler(LeagueNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleLeagueNotFoundException(LeagueNotFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, "LEAGUE_NOT_FOUND", ex.getMessage());
+    }
+    
     @ExceptionHandler(NoResultsFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResults(NoResultsFoundException ex) {
         return build(HttpStatus.NOT_FOUND, "NO_RESULTS_FOUND", ex.getMessage());
