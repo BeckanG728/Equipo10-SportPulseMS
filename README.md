@@ -10,7 +10,7 @@
 
 **Equipo:** Equipo 10  
 **Tipo:** Backend con arquitectura de microservicios  
-**API Externa:** API-Football (RapidAPI)
+**API Externa:** API-Football
 
 ---
 
