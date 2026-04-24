@@ -1,4 +1,4 @@
-package es.bytescolab.ms_teams.security;
+package es.bytescolab.ms_teams.security;  // REPLICAR: cambiar solo este package
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -9,35 +9,31 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Optional;
 
 @Component
 public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String secret;
-
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    
+    public Optional<Claims> validate(String token) {
+        try {
+            return Optional.of(parse(token));
+        } catch (JwtException | IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
 
-    public Claims extractAllClaims(String token) {
+    private Claims parse(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(signingKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
     }
 
-    public boolean isTokenValid(String token) {
-        try {
-            extractAllClaims(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
+    private SecretKey signingKey() {
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 }

@@ -1,13 +1,11 @@
 package es.bytescolab.ms_teams.controller;
 
+import es.bytescolab.ms_teams.dto.response.TeamDetailsResponse;
 import es.bytescolab.ms_teams.dto.response.TeamSummaryResponse;
 import es.bytescolab.ms_teams.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,6 +22,14 @@ public class TeamsController {
             @RequestParam Integer season
     ) {
         List<TeamSummaryResponse> response = teamService.getTeamSummary(leagueId, season);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{teamId}")
+    public ResponseEntity<TeamDetailsResponse> getTeamDetails(
+            @PathVariable Integer teamId
+    ) {
+        TeamDetailsResponse response = teamService.getTeamDetails(teamId);
         return ResponseEntity.ok(response);
     }
 }

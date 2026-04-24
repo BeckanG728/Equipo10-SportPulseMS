@@ -18,10 +18,9 @@ import java.time.Instant;
 public class GlobalExceptionHandler {
 
     // ── Excepciones personalizadas ───────────────────────────────────────────
-
     @ExceptionHandler(TeamNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleLeagueNotFoundException(TeamNotFoundException ex) {
-        return build(HttpStatus.NOT_FOUND, "LEAGUE_NOT_FOUND", ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleTeamNotFoundException(TeamNotFoundException ex) {
+        return build(HttpStatus.NOT_FOUND, "TEAM_NOT_FOUND", ex.getMessage());
     }
 
     @ExceptionHandler(NoResultsFoundException.class)
@@ -35,7 +34,6 @@ public class GlobalExceptionHandler {
     }
 
     // ── Excepciones de Spring ────────────────────────────────────────────────
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
         return build(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "El cuerpo de la solicitud no es válido");
@@ -83,7 +81,6 @@ public class GlobalExceptionHandler {
     }
 
     // ── Fallback genérico ────────────────────────────────────────────────────
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", ex.getMessage());
