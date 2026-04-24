@@ -6,7 +6,7 @@ server:
   port: 8082
 
 api-football:
-  key: ${RAPIDAPI_KEY}
+  key: ${API_KEY}
   host-url: https://v3.football.api-sports.io
 
 jwt:
