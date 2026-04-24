@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
         String token = authorizationHeader.substring(7);
 
         try {
-            Claims claims = jwtUtil.getClaims(token);
+            Claims claims = jwtUtil.parse(token);
             return ValidateResponse.builder()
                     .valid(true)
                     .userId(claims.getSubject())
