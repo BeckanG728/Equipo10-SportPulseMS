@@ -1,4 +1,4 @@
-package es.bytescolab.ms_teams.security;
+package es.bytescolab.ms_dashboard.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

@@ -1,3 +1,13 @@
 spring:
   application:
     name: ms-dashboard
+
+server:
+  port: 8089
+
+api-football:
+  key: ${RAPIDAPI_KEY}
+  host-url: https://v3.football.api-sports.io
+
+jwt:
+  secret: ${JWT_SECRET}

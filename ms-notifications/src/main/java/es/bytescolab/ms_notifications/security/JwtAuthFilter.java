@@ -1,7 +1,7 @@
-package es.bytescolab.ms_teams.security;
+package es.bytescolab.ms_notifications.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.bytescolab.ms_teams.dto.response.ErrorResponse;
+import es.bytescolab.ms_notifications.dto.response.ErrorResponse;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
