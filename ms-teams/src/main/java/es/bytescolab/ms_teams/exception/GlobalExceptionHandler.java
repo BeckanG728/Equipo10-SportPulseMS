@@ -16,8 +16,7 @@ import java.time.Instant;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    // ── Excepciones personalizadas ───────────────────────────────────────────
+    
     @ExceptionHandler(TeamNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleTeamNotFoundException(TeamNotFoundException ex) {
         return build(HttpStatus.NOT_FOUND, "TEAM_NOT_FOUND", ex.getMessage());
@@ -33,7 +32,6 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_ERROR", ex.getMessage());
     }
 
-    // ── Excepciones de Spring ────────────────────────────────────────────────
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
         return build(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "El cuerpo de la solicitud no es válido");
@@ -80,7 +78,6 @@ public class GlobalExceptionHandler {
                 "Error al comunicarse con la API externa");
     }
 
-    // ── Fallback genérico ────────────────────────────────────────────────────
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", ex.getMessage());

@@ -50,13 +50,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        SecurityContextHolder.getContext()
-                .setAuthentication(buildAuthentication(claims.get()));
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            SecurityContextHolder.getContext()
+                    .setAuthentication(buildAuthentication(claims.get()));
+        }
 
         filterChain.doFilter(request, response);
     }
 
-    // ── Privados ─────────────────────────────────────────────────────────────
     private UsernamePasswordAuthenticationToken buildAuthentication(Claims claims) {
         String subject = claims.getSubject();
         log.debug("Request autenticada — subject='{}'", subject);
