@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-public record LeagueDetailResponse(
+public record LeagueDetailsResponse(
         Integer id,
         String name,
         String type,
@@ -25,5 +25,6 @@ public record LeagueDetailResponse(
             @JsonFormat(pattern = "yyyy-MM-dd")
             LocalDate endDate,
             Boolean current
-    ) {}
+    ) {
+    }
 }

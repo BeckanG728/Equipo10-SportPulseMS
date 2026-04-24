@@ -2,8 +2,8 @@ package es.bytescolab.ms_leagues.mapper;
 
 import es.bytescolab.ms_leagues.client.model.LeaguesEntry;
 import es.bytescolab.ms_leagues.client.model.SeasonInfo;
-import es.bytescolab.ms_leagues.dto.response.LeagueDetailResponse;
-import es.bytescolab.ms_leagues.dto.response.LeaguesResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueDetailsResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueSummaryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,12 +15,12 @@ import java.util.Objects;
 @Component
 public class LeaguesMapper {
 
-    public LeaguesResponse toLeaguesResponse(LeaguesEntry entry, Integer seasonFilter) {
+    public LeagueSummaryResponse toLeaguesResponse(LeaguesEntry entry, Integer seasonFilter) {
         if (entry.league() == null) return null;
 
         SeasonInfo season = pickCurrentSeason(entry.seasons(), seasonFilter);
 
-        return LeaguesResponse.builder()
+        return LeagueSummaryResponse.builder()
                 .id(entry.league().id())
                 .name(entry.league().name())
                 .type(entry.league().type())
@@ -32,7 +32,7 @@ public class LeaguesMapper {
                 .build();
     }
 
-    public LeagueDetailResponse toLeagueDetailResponse(LeaguesEntry entry) {
+    public LeagueDetailsResponse toLeagueDetailResponse(LeaguesEntry entry) {
         if (entry.league() == null) return null;
 
         SeasonInfo season = pickCurrentSeason(entry.seasons(), null);
@@ -43,7 +43,7 @@ public class LeaguesMapper {
                         .filter(Objects::nonNull)
                         .toList();
 
-        return LeagueDetailResponse.builder()
+        return LeagueDetailsResponse.builder()
                 .id(entry.league().id())
                 .name(entry.league().name())
                 .type(entry.league().type())
@@ -55,9 +55,9 @@ public class LeaguesMapper {
     }
 
     // Helpers
-    private LeagueDetailResponse.CurrentSeason currentSeason(SeasonInfo current) {
+    private LeagueDetailsResponse.CurrentSeason currentSeason(SeasonInfo current) {
         return current == null ? null :
-                LeagueDetailResponse.CurrentSeason.builder()
+                LeagueDetailsResponse.CurrentSeason.builder()
                         .year(current.year())
                         .startDate(parseDate(current.start()))
                         .endDate(parseDate(current.end()))
