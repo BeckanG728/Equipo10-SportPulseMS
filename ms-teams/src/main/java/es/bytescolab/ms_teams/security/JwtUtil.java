@@ -1,4 +1,4 @@
-package es.bytescolab.ms_teams.security;  // REPLICAR: cambiar solo este package
+package es.bytescolab.ms_teams.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -16,7 +16,7 @@ public class JwtUtil {
 
     @Value("${jwt.secret}")
     private String secret;
-    
+
     public Optional<Claims> validate(String token) {
         try {
             return Optional.of(parse(token));

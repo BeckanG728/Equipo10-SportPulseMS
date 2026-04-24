@@ -17,14 +17,12 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    // ── Excepciones personalizadas ───────────────────────────────────────────
-
+    
     @ExceptionHandler(LeagueNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleLeagueNotFoundException(LeagueNotFoundException ex) {
         return build(HttpStatus.NOT_FOUND, "LEAGUE_NOT_FOUND", ex.getMessage());
     }
-    
+
     @ExceptionHandler(NoResultsFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResults(NoResultsFoundException ex) {
         return build(HttpStatus.NOT_FOUND, "NO_RESULTS_FOUND", ex.getMessage());
@@ -34,8 +32,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleExternalApi(ExternalApiException ex) {
         return build(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_ERROR", ex.getMessage());
     }
-
-    // ── Excepciones de Spring ────────────────────────────────────────────────
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
@@ -80,8 +76,6 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_API_ERROR",
                 "Error al comunicarse con la API externa");
     }
-
-    // ── Fallback genérico ────────────────────────────────────────────────────
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {

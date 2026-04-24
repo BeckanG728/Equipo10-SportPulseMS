@@ -2,8 +2,8 @@ package es.bytescolab.ms_leagues.service.impl;
 
 import es.bytescolab.ms_leagues.client.feign.FootballApiClient;
 import es.bytescolab.ms_leagues.client.model.ApiResponse;
-import es.bytescolab.ms_leagues.dto.response.LeagueDetailResponse;
-import es.bytescolab.ms_leagues.dto.response.LeaguesResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueDetailsResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueSummaryResponse;
 import es.bytescolab.ms_leagues.exception.ExternalApiException;
 import es.bytescolab.ms_leagues.exception.LeagueNotFoundException;
 import es.bytescolab.ms_leagues.exception.NoResultsFoundException;
@@ -28,20 +28,20 @@ public class LeaguesServiceImpl implements LeaguesService {
     private final LeaguesMapper leaguesMapper;
 
     @Value("${api-football.key}")
-    private String rapidApiKey;
+    private String apiKey;
 
     @Override
     @Cacheable(
             value = "leagues",
             key = "(#country != null ? #country : 'ALL') + '_' + (#season != null ? #season : 'ALL')"
     )
-    public List<LeaguesResponse> getLeagues(String country, Integer season) {
+    public List<LeagueSummaryResponse> getLeagues(String country, Integer season) {
         log.info("Cache MISS – consultando API-Football: country={}, season={}", country, season);
 
         ApiResponse apiResponse;
 
         try {
-            apiResponse = footballApiClient.getLeagues(rapidApiKey, country, season);
+            apiResponse = footballApiClient.getLeagues(apiKey, country, season);
         } catch (FeignException ex) {
             log.error("Error al conectar con API-Football: {}", ex.getMessage());
             throw new ExternalApiException("No se pudo conectar con la API externa", ex);
@@ -55,7 +55,7 @@ public class LeaguesServiceImpl implements LeaguesService {
             );
         }
 
-        List<LeaguesResponse> result = apiResponse.response().stream()
+        List<LeagueSummaryResponse> result = apiResponse.response().stream()
                 .map(entry -> leaguesMapper.toLeaguesResponse(entry, season))
                 .filter(Objects::nonNull)
                 .toList();
@@ -66,12 +66,12 @@ public class LeaguesServiceImpl implements LeaguesService {
 
     @Override
     @Cacheable(value = "leagueDetail", key = "#leagueId")
-    public LeagueDetailResponse getLeagueDetail(Integer leagueId) {
+    public LeagueDetailsResponse getLeagueDetail(Integer leagueId) {
         log.info("Cache MISS – consultando detalle de liga id={}", leagueId);
 
         ApiResponse apiResponse;
         try {
-            apiResponse = footballApiClient.getLeagueById(rapidApiKey, leagueId);
+            apiResponse = footballApiClient.getLeagueById(apiKey, leagueId);
         } catch (FeignException ex) {
             log.error("Error al conectar con API-Football: {}", ex.getMessage());
             throw new ExternalApiException("No se pudo conectar con la API externa", ex);

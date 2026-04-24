@@ -8,10 +8,10 @@ import es.bytescolab.ms_auth.dto.response.ValidateResponse;
 import es.bytescolab.ms_auth.entity.User;
 import es.bytescolab.ms_auth.exception.InvalidCredentialsException;
 import es.bytescolab.ms_auth.exception.UserAlreadyExists;
-import es.bytescolab.ms_auth.mapper.UserMappper;
+import es.bytescolab.ms_auth.mapper.UserMapper;
 import es.bytescolab.ms_auth.repository.UserRepository;
+import es.bytescolab.ms_auth.security.JwtUtil;
 import es.bytescolab.ms_auth.service.AuthService;
-import es.bytescolab.ms_auth.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
-    private final UserMappper userMapper;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.toEntity(request);
 
         if (userRepository.existsByUsername(user.getUsername())) {
-            throw new UserAlreadyExists("Ya existe un usuario con este usuario");
+            throw new UserAlreadyExists("Ya existe un usuario con este username");
         }
 
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -79,7 +79,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidCredentialsException("Email o contraseña incorrectos");
         }
 
-        // Aqui se reutiliza el usuario autenticado (NO se hace otra query)
+        // Aqui se reutiliza el usuario autenticado (NO se hace otra query a db)
         User user = (User) authentication.getPrincipal();
 
         String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole());
@@ -105,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
         String token = authorizationHeader.substring(7);
 
         try {
-            Claims claims = jwtUtil.getClaims(token);
+            Claims claims = jwtUtil.parse(token);
             return ValidateResponse.builder()
                     .valid(true)
                     .userId(claims.getSubject())

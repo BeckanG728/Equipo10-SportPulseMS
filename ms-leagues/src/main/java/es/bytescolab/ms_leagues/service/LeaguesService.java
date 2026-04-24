@@ -1,12 +1,12 @@
 package es.bytescolab.ms_leagues.service;
 
-import es.bytescolab.ms_leagues.dto.response.LeagueDetailResponse;
-import es.bytescolab.ms_leagues.dto.response.LeaguesResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueDetailsResponse;
+import es.bytescolab.ms_leagues.dto.response.LeagueSummaryResponse;
 
 import java.util.List;
 
 public interface LeaguesService {
-    List<LeaguesResponse> getLeagues(String country, Integer season);
+    List<LeagueSummaryResponse> getLeagues(String country, Integer season);
 
-    LeagueDetailResponse getLeagueDetail(Integer leagueId);
+    LeagueDetailsResponse getLeagueDetail(Integer leagueId);
 }

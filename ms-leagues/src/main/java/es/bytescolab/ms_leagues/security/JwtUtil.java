@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Optional;
 
 @Component
 public class JwtUtil {
@@ -20,7 +21,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
 
-    public Claims extractAllClaims(String token) {
+    private Claims parse(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -28,16 +29,11 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    public boolean isTokenValid(String token) {
+    public Optional<Claims> validate(String token) {
         try {
-            extractAllClaims(token);
-            return true;
+            return Optional.of(parse(token));
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            return Optional.empty();
         }
-    }
-
-    public String extractUsername(String token) {
-        return extractAllClaims(token).getSubject();
     }
 }

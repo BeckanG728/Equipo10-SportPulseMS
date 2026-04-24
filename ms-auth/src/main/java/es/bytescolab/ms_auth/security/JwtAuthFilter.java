@@ -1,6 +1,8 @@
-package es.bytescolab.ms_auth.util;
+package es.bytescolab.ms_auth.security;
 
 import es.bytescolab.ms_auth.service.CustomUserDetailsService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +20,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthorizationFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
@@ -38,36 +40,35 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         String token = header.substring(7);
 
-        // Validar token
-        if (!jwtUtil.validateToken(token)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        try {
+            // UNA SOLA LECTURA DEL TOKEN
+            Claims claims = jwtUtil.parse(token);
 
-        // Subject del token (userID)
-        UUID userId = jwtUtil.extractUserId(token);
+            UUID userId = jwtUtil.extractUserId(claims);
 
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        // Condición ajustada
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // Pasar userId
-            UserDetails userDetails = this.userDetailsService.loadUserByUserID(userId);
+                UserDetails userDetails = userDetailsService.loadUserByUserID(userId);
 
-            if (!jwtUtil.isExpired(token)) {
-                UsernamePasswordAuthenticationToken authToken =
+                UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
                                 userDetails.getAuthorities()
                         );
 
-                authToken.setDetails(
+                auth.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
+
+        } catch (JwtException | IllegalArgumentException e) {
+            // token inválido → no autenticado
+            SecurityContextHolder.clearContext();
         }
+
         filterChain.doFilter(request, response);
     }
 }

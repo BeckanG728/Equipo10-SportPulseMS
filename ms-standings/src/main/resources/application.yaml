@@ -1,3 +1,13 @@
 spring:
   application:
     name: ms-standings
+
+server:
+  port: 8086
+
+api-football:
+  key: ${API_KEY}
+  host-url: https://v3.football.api-sports.io
+
+jwt:
+  secret: ${JWT_SECRET}

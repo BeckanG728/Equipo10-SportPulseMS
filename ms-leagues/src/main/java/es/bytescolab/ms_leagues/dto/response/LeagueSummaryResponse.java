@@ -6,7 +6,7 @@ import lombok.Builder;
 import java.time.LocalDate;
 
 @Builder
-public record LeaguesResponse(
+public record LeagueSummaryResponse(
         Integer id,
         String name,
         String type,

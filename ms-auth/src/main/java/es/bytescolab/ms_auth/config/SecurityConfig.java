@@ -1,7 +1,7 @@
 package es.bytescolab.ms_auth.config;
 
+import es.bytescolab.ms_auth.security.JwtAuthFilter;
 import es.bytescolab.ms_auth.service.CustomUserDetailsService;
-import es.bytescolab.ms_auth.util.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthorizationFilter jwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
 
 
