@@ -173,3 +173,35 @@ logging:
 
 jwt:
   secret: ${JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      base-path: /internal
+  endpoint:
+    health:
+      show-details: always
+      show-components: ALWAYS
+      probes:
+        enabled: true
+      groups:
+        liveness:
+          include: livenessState,ping
+        readiness:
+          include: readinessState,diskSpace,redis,services
+
+services:
+  auth:
+    url: ${AUTH_SERVICE_URL:http://ms-auth:8081}/api/actuator/health
+  leagues:
+    url: ${LEAGUES_SERVICE_URL:http://ms-leagues:8082}/api/actuator/health
+  teams:
+    url: ${TEAMS_SERVICE_URL:http://ms-teams:8083}/api/actuator/health
+  fixtures:
+    url: ${FIXTURES_SERVICE_URL:http://ms-fixtures:8085}/api/actuator/health
+  standings:
+    url: ${STANDINGS_SERVICE_URL:http://ms-standings:8086}/api/actuator/health
+  notifications:
+    url: ${NOTIFICATIONS_SERVICE_URL:http://ms-notifications:8088}/api/actuator/health
+  dashboard:
+    url: ${DASHBOARD_SERVICE_URL:http://ms-dashboard:8089}/api/actuator/health

@@ -4,7 +4,8 @@ spring:
 
 server:
   port: 8083
-  max-http-request-header-size: 256KB
+  servlet:
+    context-path: /api
 
 api-football:
   key: ${API_KEY}
@@ -12,3 +13,17 @@ api-football:
 
 jwt:
   secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+

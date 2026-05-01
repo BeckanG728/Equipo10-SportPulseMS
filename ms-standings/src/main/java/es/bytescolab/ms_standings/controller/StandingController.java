@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("api/standings")
+@RequestMapping("/standings")
 @RequiredArgsConstructor
 public class StandingController {
     private final StandingService standingService;
