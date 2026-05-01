@@ -173,3 +173,21 @@ logging:
 
 jwt:
   secret: ${JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /
+  endpoint:
+    health:
+      show-details: always
+      show-components: ALWAYS
+      probes:
+        enabled: true
+      groups:
+        liveness:
+          include: livenessState,ping
+        readiness:
+          include: readinessState,diskSpace,redis,services
