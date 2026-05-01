@@ -4,12 +4,25 @@ spring:
 
 server:
   port: 8082
+  servlet:
+    context-path: /api
 
 api-football:
   key: ${RAPIDAPI_KEY}
   host-url: https://v3.football.api-sports.io
 
-
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true

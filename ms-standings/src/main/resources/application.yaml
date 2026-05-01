@@ -1,3 +1,20 @@
 spring:
   application:
     name: ms-standings
+
+server:
+  port: 8086
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
