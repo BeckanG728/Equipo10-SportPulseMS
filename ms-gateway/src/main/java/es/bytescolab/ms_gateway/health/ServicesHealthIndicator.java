@@ -5,6 +5,7 @@ import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,31 +17,30 @@ public class ServicesHealthIndicator implements HealthIndicator {
     private final Map<String, String> services;
 
     public ServicesHealthIndicator(
-            @Value("${services.auth.url:http://ms-auth:8081/api/actuator/health}") String authUrl,
-            @Value("${services.leagues.url:http://ms-leagues:8082/api/actuator/health}") String leaguesUrl,
-            @Value("${services.teams.url:http://ms-teams:8083/api/actuator/health}") String teamsUrl,
-            @Value("${services.fixtures.url:http://ms-fixtures:8085/api/actuator/health}") String fixturesUrl,
-            @Value("${services.standings.url:http://ms-standings:8086/api/actuator/health}") String standingsUrl,
-            @Value("${services.notifications.url:http://ms-notifications:8088/api/actuator/health}") String notificationsUrl,
-            @Value("${services.dashboard.url:http://ms-dashboard:8089/api/actuator/health}") String dashboardUrl) {
+            @Value("${services.auth.url}") String authUrl,
+            @Value("${services.leagues.url}") String leaguesUrl,
+            @Value("${services.teams.url}") String teamsUrl,
+            @Value("${services.fixtures.url}") String fixturesUrl,
+            @Value("${services.standings.url}") String standingsUrl,
+            @Value("${services.notifications.url}") String notificationsUrl,
+            @Value("${services.dashboard.url}") String dashboardUrl) {
         this.webClient = WebClient.builder()
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(16 * 1024))
                 .build();
 
         this.services = Map.of(
-                "auth", authUrl,
-                "leagues", leaguesUrl,
-                "teams", teamsUrl,
-                "fixtures", fixturesUrl,
-                "standings", standingsUrl,
-                "notifications", notificationsUrl,
-                "dashboard", dashboardUrl);
+                "ms-auth", authUrl,
+                "ms-leagues", leaguesUrl,
+                "ms-teams", teamsUrl,
+                "ms-fixtures", fixturesUrl,
+                "ms-standings", standingsUrl,
+                "ms-notifications", notificationsUrl,
+                "ms-dashboard", dashboardUrl);
     }
 
     @Override
     public Health health() {
         Map<String, Object> details = new LinkedHashMap<>();
-        details.put("timestamp", java.time.LocalDateTime.now().toString());
 
         boolean allUp = true;
 

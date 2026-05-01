@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("api/fixtures")
+@RequestMapping("/fixtures")
 @RequiredArgsConstructor
 public class FixtureController {
 
