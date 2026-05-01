@@ -59,8 +59,7 @@ public class TeamServiceImpl implements TeamService {
                 .filter(Objects::nonNull)
                 .toList();
 
-        log.info("Se obtuvieron {} ligas de API-Football", result.size());
-
+        log.info("Se obtuvieron {} equipos de API-Football", result.size());
         return result;
     }
 

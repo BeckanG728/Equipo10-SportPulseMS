@@ -4,6 +4,7 @@ spring:
 
 server:
   port: 8083
+  max-http-request-header-size: 256KB
 
 api-football:
   key: ${API_KEY}

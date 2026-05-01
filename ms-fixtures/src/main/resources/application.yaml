@@ -1,6 +1,9 @@
 spring:
   application:
     name: ms-fixtures
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
 
 server:
   port: 8085
@@ -9,5 +12,13 @@ api-football:
   key: ${API_KEY}
   host-url: https://v3.football.api-sports.io
 
+ms-teams:
+  host-url: ${TEAMS_SERVICE_URL}
+
 jwt:
   secret: ${JWT_SECRET}
+
+logging:
+  level:
+    es.bytescolab.ms_fixtures: DEBUG
+    feign: DEBUG
