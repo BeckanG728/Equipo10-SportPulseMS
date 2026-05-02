@@ -7,7 +7,7 @@
 ![Docker](https://img.shields.io/badge/Container-Docker-2496ED?logo=docker&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL_15-4169E1?logo=postgresql&logoColor=white)
 
-**Equipo:** Equipo 10
+**Equipo:** Equipo 10   
 **Arquitectura:** Microservicios  
 **API Externa:** [API-Football v3](https://www.api-football.com/)
 
