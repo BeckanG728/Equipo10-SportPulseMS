@@ -67,9 +67,9 @@ ms-gateway (:8080) ──── Redis (rate limiting)
 | `ms-leagues`       | ✅ Implementado | Feign → API-Football, Caffeine cache, mapper, endpoints GET /leagues          |
 | `ms-teams`         | ✅ Implementado | Feign → API-Football, Caffeine cache (`teams`, `teamDetail`), mapper          |
 | `ms-fixtures`      | ✅ Implementado | Feign → API-Football + ms-teams, `TeamLogoService`, live matches, events      |
-| `ms-standings`     | 🔧 Scaffolded  | Estructura base + Feign client API-Football; lógica de negocio pendiente      |
-| `ms-notifications` | 🔧 Scaffolded  | Estructura base + PostgreSQL; lógica pendiente                                |
-| `ms-dashboard`     | 🔧 Scaffolded  | Estructura base; agregación de servicios pendiente                            |
+| `ms-standings`     | 🔧 En Proceso  | Estructura base + Feign client API-Football; lógica de negocio pendiente      |
+| `ms-notifications` | 🔧 En Proceso  | Estructura base + PostgreSQL; lógica pendiente                                |
+| `ms-dashboard`     | 🔧 En Proceso  | Estructura base; agregación de servicios pendiente                            |
 
 ---
 
