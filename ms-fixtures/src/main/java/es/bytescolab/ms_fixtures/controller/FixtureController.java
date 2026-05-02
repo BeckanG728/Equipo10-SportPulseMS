@@ -2,6 +2,7 @@ package es.bytescolab.ms_fixtures.controller;
 
 import es.bytescolab.ms_fixtures.dto.request.FixtureFilterRequest;
 import es.bytescolab.ms_fixtures.dto.response.FixtureSummaryResponse;
+import es.bytescolab.ms_fixtures.dto.response.LiveMatchesResponse;
 import es.bytescolab.ms_fixtures.enums.FixtureStatus;
 import es.bytescolab.ms_fixtures.service.FixtureService;
 import lombok.RequiredArgsConstructor;
@@ -24,22 +25,6 @@ public class FixtureController {
 
     private final FixtureService fixtureService;
 
-    /**
-     * Lista partidos filtrados por liga, equipo, fecha y/o estado.
-     *
-     * <ul>
-     *   <li>Si no se proporciona {@code date}, se usa el día actual.</li>
-     *   <li>El {@code season} se deriva del año de la fecha resuelta y se
-     *       envía automáticamente cuando se filtra por {@code league} o
-     *       {@code team} (requerimiento de la API externa).</li>
-     *   <li>Requiere token JWT válido en la cabecera {@code Authorization}.</li>
-     * </ul>
-     *
-     * @param league ID de la liga (opcional)
-     * @param team   ID del equipo (opcional)
-     * @param date   Fecha en formato YYYY-MM-DD (opcional; rango permitido: ayer, hoy, mañana)
-     * @param status Estado del partido: NS, LIVE o FT (opcional)
-     */
     @GetMapping
     public ResponseEntity<List<FixtureSummaryResponse>> getFixtures(
             @RequestParam(required = false) Integer league,
@@ -50,4 +35,11 @@ public class FixtureController {
         FixtureFilterRequest filter = new FixtureFilterRequest(league, team, date, status);
         return ResponseEntity.ok(fixtureService.getFixtures(filter));
     }
+
+    @GetMapping("/live")
+    public ResponseEntity<List<LiveMatchesResponse>> getLiveMatches() {
+        List<LiveMatchesResponse> response = fixtureService.getLiveMatches();
+        return ResponseEntity.ok(response);
+    }
+
 }

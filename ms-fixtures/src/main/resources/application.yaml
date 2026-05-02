@@ -8,6 +8,7 @@ spring:
 api-football:
   key: ${API_KEY}
   host-url: https://v3.football.api-sports.io
+  default-season: 2024
 
 ms-teams:
   host-url: ${TEAMS_SERVICE_URL}

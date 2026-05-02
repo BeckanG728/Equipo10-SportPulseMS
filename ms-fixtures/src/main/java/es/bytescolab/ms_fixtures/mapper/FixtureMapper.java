@@ -1,7 +1,9 @@
 package es.bytescolab.ms_fixtures.mapper;
 
 import es.bytescolab.ms_fixtures.client.apifootball.dto.FixtureEntry;
-import es.bytescolab.ms_fixtures.dto.response.*;
+import es.bytescolab.ms_fixtures.dto.common.*;
+import es.bytescolab.ms_fixtures.dto.response.FixtureSummaryResponse;
+import es.bytescolab.ms_fixtures.dto.response.LiveMatchesResponse;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,9 +16,9 @@ public class FixtureMapper {
      * @param homeLogo logo del equipo local ya resuelto
      * @param awayLogo logo del equipo visitante ya resuelto
      */
-    public FixtureSummaryResponse toResponse(FixtureEntry entry,
-                                             String homeLogo,
-                                             String awayLogo) {
+    public FixtureSummaryResponse toSummaryResponse(FixtureEntry entry,
+                                                    String homeLogo,
+                                                    String awayLogo) {
         Integer homeGoals = entry.goals() != null ? entry.goals().home() : null;
         Integer awayGoals = entry.goals() != null ? entry.goals().away() : null;
 
@@ -31,6 +33,20 @@ public class FixtureMapper {
         );
     }
 
+    public LiveMatchesResponse toLiveMatchesResponse(FixtureEntry entry) {
+        Integer homeGoals = entry.goals() != null ? entry.goals().home() : null;
+        Integer awayGoals = entry.goals() != null ? entry.goals().away() : null;
+
+        return new LiveMatchesResponse(
+                entry.fixture().id().intValue(),
+                entry.fixture().status().elapsed(),
+                toStatus(entry),
+                toLeagueMatches(entry),
+                toTeamLiveMatches(entry.teams().home().id(), entry.teams().home().name(), homeGoals),
+                toTeamLiveMatches(entry.teams().away().id(), entry.teams().away().name(), awayGoals)
+        );
+    }
+
     private Status toStatus(FixtureEntry entry) {
         return new Status(
                 entry.fixture().status().shortStatus(),
@@ -38,16 +54,27 @@ public class FixtureMapper {
         );
     }
 
-    private League toLeague(FixtureEntry entry) {
-        return new League(
+    private LeagueSummary toLeague(FixtureEntry entry) {
+        return new LeagueSummary(
                 entry.league().id(),
                 entry.league().name(),
                 entry.league().round()
         );
     }
 
-    private TeamFixture toTeam(Integer id, String name, String logo, Integer goals) {
-        return new TeamFixture(id, name, logo, goals);
+    private LeagueMatches toLeagueMatches(FixtureEntry entry) {
+        return new LeagueMatches(
+                entry.league().id(),
+                entry.league().name()
+        );
+    }
+
+    private TeamSummary toTeam(Integer id, String name, String logo, Integer goals) {
+        return new TeamSummary(id, name, logo, goals);
+    }
+
+    private TeamLiveMatches toTeamLiveMatches(Integer id, String name, Integer goals) {
+        return new TeamLiveMatches(id, name, goals);
     }
 
     private Venue toVenue(FixtureEntry entry) {

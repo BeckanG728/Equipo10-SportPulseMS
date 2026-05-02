@@ -13,15 +13,15 @@ import java.time.LocalDate;
 public interface ApiFootballClient {
 
     /**
-     * Consulta fixtures contra api-football.
+     * Consulta fixtures hacia api-football.
      * <p>
      * Parámetros relevantes según la documentación oficial:
      * <p>
-     * - {@code league}  ID de la liga (requiere {@code season} cuando se usa).
-     * - {@code team}    ID del equipo (requiere {@code season} cuando se usa).
+     * - {@code league}  ID de la liga (requiere {@code season} cuando se usa). <br>
+     * - {@code team}    ID del equipo (requiere {@code season} cuando se usa). <br>
      * - {@code season}  Temporada en formato YYYY. Obligatorio junto a {@code league} o {@code team}.
-     * Se deriva del año de la fecha resuelta.
-     * - {@code date}    Fecha YYYY-MM-DD. En plan gratuito solo acepta ayer, hoy y mañana.
+     * Se deriva del año de la fecha resuelta. <br>
+     * - {@code date}    Fecha YYYY-MM-DD. En plan gratuito solo acepta ayer, hoy y mañana. <br>
      * - {@code status}  Código corto del estado: NS, LIVE o FT.
      */
     @GetMapping("/fixtures")
@@ -33,5 +33,21 @@ public interface ApiFootballClient {
             @RequestParam(value = "date", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(value = "status", required = false) String status
+    );
+
+
+    /**
+     * Consulta fixtures en vivo hacia api-football.
+     * <p>
+     * Parámetros relevantes según la documentación oficial:
+     * <p>
+     * - Parametro {@code live}  Recibe argumento {@code all} para listar todos los partidos en vivo (estatus 1H,HT,2H)
+     * <p>
+     * Endpoint correcto: GET /fixtures?live=all
+     */
+    @GetMapping("/fixtures")
+    ApiResponse getLiveMatches(
+            @RequestHeader("x-apisports-key") String apiKey,
+            @RequestParam(value = "live") String live
     );
 }
