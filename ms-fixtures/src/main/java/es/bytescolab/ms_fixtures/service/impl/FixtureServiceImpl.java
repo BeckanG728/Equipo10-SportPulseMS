@@ -3,11 +3,14 @@ package es.bytescolab.ms_fixtures.service.impl;
 import es.bytescolab.ms_fixtures.client.apifootball.ApiFootballClient;
 import es.bytescolab.ms_fixtures.client.apifootball.dto.ApiResponse;
 import es.bytescolab.ms_fixtures.client.apifootball.dto.FixtureEntry;
+import es.bytescolab.ms_fixtures.client.apifootball.dto.FixtureEventEntry;
 import es.bytescolab.ms_fixtures.dto.request.FixtureFilterRequest;
+import es.bytescolab.ms_fixtures.dto.response.FixtureEventResponse;
 import es.bytescolab.ms_fixtures.dto.response.FixtureSummaryResponse;
 import es.bytescolab.ms_fixtures.dto.response.LiveMatchesResponse;
 import es.bytescolab.ms_fixtures.exception.ExternalApiException;
 import es.bytescolab.ms_fixtures.exception.FixturesNotFoundException;
+import es.bytescolab.ms_fixtures.mapper.FixtureEventMapper;
 import es.bytescolab.ms_fixtures.mapper.FixtureMapper;
 import es.bytescolab.ms_fixtures.service.FixtureService;
 import es.bytescolab.ms_fixtures.service.support.TeamLogoService;
@@ -28,6 +31,7 @@ public class FixtureServiceImpl implements FixtureService {
 
     private final ApiFootballClient apiFootballClient;
     private final FixtureMapper fixtureMapper;
+    private final FixtureEventMapper fixtureEventMapper;
     private final TeamLogoService teamLogoService;
 
     @Value("${api-football.key}")
@@ -35,7 +39,7 @@ public class FixtureServiceImpl implements FixtureService {
 
     @Value("${api-football.default-season}")
     private int defaultSeason;
-    
+
     private static final String LIVE_MATCHES_PARAM = "all";
 
     @Override
@@ -68,7 +72,7 @@ public class FixtureServiceImpl implements FixtureService {
         log.debug("Llamando a api-football — league={}, team={}, season={}, date={}, status={}",
                 resolved.league(), resolved.team(), season, resolved.date(), statusCode);
 
-        ApiResponse apiResponse;
+        ApiResponse<FixtureEntry> apiResponse;
         try {
             apiResponse = apiFootballClient.getFixtures(
                     apiKey,
@@ -79,7 +83,7 @@ public class FixtureServiceImpl implements FixtureService {
                     statusCode
             );
         } catch (FeignException ex) {
-            log.error("FeignException llamando a api-football — status={}, body={}",
+            log.error("FeignException llamando a api-football — fixtures: status={}, body={}",
                     ex.status(), ex.contentUTF8());
             throw new ExternalApiException(
                     "Error al obtener partidos de la API externa: " + ex.status(), ex
@@ -90,7 +94,7 @@ public class FixtureServiceImpl implements FixtureService {
                 apiResponse.response() == null ? "null" : apiResponse.response().size());
 
         if (apiResponse.response() == null || apiResponse.response().isEmpty()) {
-            throw new FixturesNotFoundException();
+            throw new FixturesNotFoundException("No se encontraron partidos para los filtros proporcionados");
         }
 
         return apiResponse.response().stream()
@@ -106,11 +110,12 @@ public class FixtureServiceImpl implements FixtureService {
     public List<LiveMatchesResponse> getLiveMatches() {
         log.info("[CACHE MISS] Consultando fixtures — partidos en vivo");
 
-        ApiResponse apiResponse;
+        ApiResponse<FixtureEntry> apiResponse;
         try {
             apiResponse = apiFootballClient.getLiveMatches(apiKey, LIVE_MATCHES_PARAM);
         } catch (FeignException ex) {
-            log.error("FeignException llamando a api-football — body={}", ex.contentUTF8());
+            log.error("FeignException llamando a api-football — fixtures_live: status={}, body={}",
+                    ex.status(), ex.contentUTF8());
             throw new ExternalApiException(
                     "Error al obtener partidos en vivo de la API externa: " + ex.status(), ex
             );
@@ -125,6 +130,38 @@ public class FixtureServiceImpl implements FixtureService {
 
         return apiResponse.response().stream()
                 .map(fixtureMapper::toLiveMatchesResponse)
+                .toList();
+    }
+
+
+    @Override
+    @Cacheable(
+            value = "fixtures",
+            key = "('events') + ':' + (#fixtureId)"
+    )
+    public List<FixtureEventResponse> getEvents(Integer fixtureId) {
+        log.info("[CACHE MISS] Consultando eventos del partido — fixture ID: {}", fixtureId);
+
+        ApiResponse<FixtureEventEntry> apiResponse;
+        try {
+            apiResponse = apiFootballClient.getEvents(apiKey, fixtureId);
+        } catch (FeignException ex) {
+            log.error("FeignException llamando a api-football — fixture_events: status={}, body={}",
+                    ex.status(), ex.contentUTF8());
+            throw new ExternalApiException(
+                    "Error al obtener los eventos del partido de la API externa: " + ex.status(), ex
+            );
+        }
+
+        log.info("Respuesta de API externa — total de eventos del partido: {}",
+                apiResponse.response() == null ? "null" : apiResponse.response().size());
+
+        if (apiResponse.response() == null || apiResponse.response().isEmpty()) {
+            throw new FixturesNotFoundException("No existe un partido con el ID proporcionado");
+        }
+
+        return apiResponse.response().stream()
+                .map(fixtureEventMapper::toFixtureEventResponse)
                 .toList();
     }
 

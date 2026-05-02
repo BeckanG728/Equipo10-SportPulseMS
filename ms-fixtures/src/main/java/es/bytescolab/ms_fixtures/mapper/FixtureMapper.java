@@ -9,13 +9,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class FixtureMapper {
 
-    /**
-     * Mapea un FixtureEntry al DTO de respuesta.
-     *
-     * @param entry    entrada cruda de api-football
-     * @param homeLogo logo del equipo local ya resuelto
-     * @param awayLogo logo del equipo visitante ya resuelto
-     */
     public FixtureSummaryResponse toSummaryResponse(FixtureEntry entry,
                                                     String homeLogo,
                                                     String awayLogo) {
