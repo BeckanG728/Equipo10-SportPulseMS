@@ -17,8 +17,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String paramName = ex.getName();
-        String value     = ex.getValue() != null ? ex.getValue().toString() : "null";
-        String message   = "Valor inválido para el parámetro '" + paramName + "': " + value;
+        String value = ex.getValue() != null ? ex.getValue().toString() : "null";
+        String message = "Valor inválido para el parámetro '" + paramName + "': " + value;
         log.warn("Error de conversión de parámetro: {}", message);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         log.info("Sin resultados: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(buildError("FIXTURES_NOT_FOUND", ex.getMessage()));
+                .body(buildError("FIXTURE_NOT_FOUND", ex.getMessage()));
     }
 
     @ExceptionHandler(ExternalApiException.class)

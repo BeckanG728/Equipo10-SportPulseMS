@@ -1,6 +1,8 @@
 package es.bytescolab.ms_fixtures.client.apifootball;
 
 import es.bytescolab.ms_fixtures.client.apifootball.dto.ApiResponse;
+import es.bytescolab.ms_fixtures.client.apifootball.dto.FixtureEntry;
+import es.bytescolab.ms_fixtures.client.apifootball.dto.FixtureEventEntry;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +27,7 @@ public interface ApiFootballClient {
      * - {@code status}  Código corto del estado: NS, LIVE o FT.
      */
     @GetMapping("/fixtures")
-    ApiResponse getFixtures(
+    ApiResponse<FixtureEntry> getFixtures(
             @RequestHeader("x-apisports-key") String apiKey,
             @RequestParam(value = "league", required = false) Integer league,
             @RequestParam(value = "team", required = false) Integer team,
@@ -43,11 +45,25 @@ public interface ApiFootballClient {
      * <p>
      * - Parametro {@code live}  Recibe argumento {@code all} para listar todos los partidos en vivo (estatus 1H,HT,2H)
      * <p>
-     * Endpoint correcto: GET /fixtures?live=all
      */
     @GetMapping("/fixtures")
-    ApiResponse getLiveMatches(
+    ApiResponse<FixtureEntry> getLiveMatches(
             @RequestHeader("x-apisports-key") String apiKey,
             @RequestParam(value = "live") String live
+    );
+
+    /**
+     * Consulta fixtures/event hacia api-football.
+     * <p>
+     * Parámetros relevantes según la documentación oficial:
+     * <p>
+     * - Parametro {@code fixture}  Recibe un argumento {@code ID} para listar
+     * todos los eventos del fixture seleccionado
+     * <p>
+     */
+    @GetMapping("/fixtures/events")
+    ApiResponse<FixtureEventEntry> getEvents(
+            @RequestHeader("x-apisports-key") String apiKey,
+            @RequestParam(value = "fixture") Integer fixture
     );
 }

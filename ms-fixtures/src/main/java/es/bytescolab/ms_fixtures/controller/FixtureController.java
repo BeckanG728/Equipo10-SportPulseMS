@@ -1,6 +1,7 @@
 package es.bytescolab.ms_fixtures.controller;
 
 import es.bytescolab.ms_fixtures.dto.request.FixtureFilterRequest;
+import es.bytescolab.ms_fixtures.dto.response.FixtureEventResponse;
 import es.bytescolab.ms_fixtures.dto.response.FixtureSummaryResponse;
 import es.bytescolab.ms_fixtures.dto.response.LiveMatchesResponse;
 import es.bytescolab.ms_fixtures.enums.FixtureStatus;
@@ -9,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -39,6 +37,14 @@ public class FixtureController {
     @GetMapping("/live")
     public ResponseEntity<List<LiveMatchesResponse>> getLiveMatches() {
         List<LiveMatchesResponse> response = fixtureService.getLiveMatches();
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{fixtureId}/events")
+    public ResponseEntity<List<FixtureEventResponse>> getEvents(
+            @PathVariable Integer fixtureId
+    ) {
+        List<FixtureEventResponse> response = fixtureService.getEvents(fixtureId);
         return ResponseEntity.ok(response);
     }
 
