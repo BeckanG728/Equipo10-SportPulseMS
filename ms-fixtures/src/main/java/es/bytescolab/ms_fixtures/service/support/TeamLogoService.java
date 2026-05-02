@@ -1,4 +1,4 @@
-package es.bytescolab.ms_fixtures.service.impl;
+package es.bytescolab.ms_fixtures.service.support;
 
 import es.bytescolab.ms_fixtures.client.ms_teams.MsTeamsClient;
 import es.bytescolab.ms_fixtures.client.ms_teams.dto.TeamDetailsDto;

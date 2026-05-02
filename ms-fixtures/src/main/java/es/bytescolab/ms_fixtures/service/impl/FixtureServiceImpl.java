@@ -5,10 +5,12 @@ import es.bytescolab.ms_fixtures.client.apifootball.dto.ApiResponse;
 import es.bytescolab.ms_fixtures.client.apifootball.dto.FixtureEntry;
 import es.bytescolab.ms_fixtures.dto.request.FixtureFilterRequest;
 import es.bytescolab.ms_fixtures.dto.response.FixtureSummaryResponse;
+import es.bytescolab.ms_fixtures.dto.response.LiveMatchesResponse;
 import es.bytescolab.ms_fixtures.exception.ExternalApiException;
 import es.bytescolab.ms_fixtures.exception.FixturesNotFoundException;
 import es.bytescolab.ms_fixtures.mapper.FixtureMapper;
 import es.bytescolab.ms_fixtures.service.FixtureService;
+import es.bytescolab.ms_fixtures.service.support.TeamLogoService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +33,11 @@ public class FixtureServiceImpl implements FixtureService {
     @Value("${api-football.key}")
     private String apiKey;
 
+    @Value("${api-football.default-season}")
+    private int defaultSeason;
+    
+    private static final String LIVE_MATCHES_PARAM = "all";
+
     @Override
     @Cacheable(
             value = "fixtures",
@@ -43,7 +49,42 @@ public class FixtureServiceImpl implements FixtureService {
         log.info("[CACHE MISS] Consultando fixtures — league={}, team={}, date={}, status={}",
                 resolved.league(), resolved.team(), resolved.date(), resolved.status());
 
-        ApiResponse apiResponse = fetchFromExternalApi(resolved);
+        boolean hasLeagueOrTeam = resolved.league() != null || resolved.team() != null;
+
+        Integer season = null;
+        if (hasLeagueOrTeam) {
+            // Si el usuario proporcionó una fecha, el season se deriva de ella.
+            // Si no, se usa defaultSeason como temporada más reciente disponible
+            // en el plan gratuito de api-football (rango disponible: 2022-2024).
+            season = resolved.date() != null
+                    ? resolved.date().getYear()
+                    : defaultSeason;
+        }
+
+        String statusCode = resolved.status() != null
+                ? resolved.status().toString()
+                : null;
+
+        log.debug("Llamando a api-football — league={}, team={}, season={}, date={}, status={}",
+                resolved.league(), resolved.team(), season, resolved.date(), statusCode);
+
+        ApiResponse apiResponse;
+        try {
+            apiResponse = apiFootballClient.getFixtures(
+                    apiKey,
+                    resolved.league(),
+                    resolved.team(),
+                    season,
+                    resolved.date(),
+                    statusCode
+            );
+        } catch (FeignException ex) {
+            log.error("FeignException llamando a api-football — status={}, body={}",
+                    ex.status(), ex.contentUTF8());
+            throw new ExternalApiException(
+                    "Error al obtener partidos de la API externa: " + ex.status(), ex
+            );
+        }
 
         log.info("Respuesta de API externa — total fixtures: {}",
                 apiResponse.response() == null ? "null" : apiResponse.response().size());
@@ -54,7 +95,37 @@ public class FixtureServiceImpl implements FixtureService {
 
         return apiResponse.response().stream()
                 .map(this::enrichAndMap)
-                .collect(Collectors.toList());
+                .toList();
+    }
+
+    @Override
+    @Cacheable(
+            value = "fixtures",
+            key = "('_live')"
+    )
+    public List<LiveMatchesResponse> getLiveMatches() {
+        log.info("[CACHE MISS] Consultando fixtures — partidos en vivo");
+
+        ApiResponse apiResponse;
+        try {
+            apiResponse = apiFootballClient.getLiveMatches(apiKey, LIVE_MATCHES_PARAM);
+        } catch (FeignException ex) {
+            log.error("FeignException llamando a api-football — body={}", ex.contentUTF8());
+            throw new ExternalApiException(
+                    "Error al obtener partidos en vivo de la API externa: " + ex.status(), ex
+            );
+        }
+
+        log.info("Respuesta de API externa — total de partidos en vivo: {}",
+                apiResponse.response() == null ? "null" : apiResponse.response().size());
+
+        if (apiResponse.response() == null || apiResponse.response().isEmpty()) {
+            return List.of();
+        }
+
+        return apiResponse.response().stream()
+                .map(fixtureMapper::toLiveMatchesResponse)
+                .toList();
     }
 
 
@@ -83,47 +154,6 @@ public class FixtureServiceImpl implements FixtureService {
         );
     }
 
-
-    // Llamada a API externa
-    private ApiResponse fetchFromExternalApi(FixtureFilterRequest filter) {
-        boolean hasLeagueOrTeam = filter.league() != null || filter.team() != null;
-
-        Integer season = null;
-        if (hasLeagueOrTeam) {
-            // Si el usuario proporcionó una fecha, el season se deriva de ella.
-            // Si no, se usa 2024 como temporada más reciente disponible
-            // en el plan gratuito de api-football (rango disponible: 2022-2024).
-            season = filter.date() != null
-                    ? filter.date().getYear()
-                    : 2024;
-        }
-
-        String statusCode = filter.status() != null
-                ? filter.status().toString()
-                : null;
-
-        log.debug("Llamando a api-football — league={}, team={}, season={}, date={}, status={}",
-                filter.league(), filter.team(), season, filter.date(), statusCode);
-
-        try {
-            return apiFootballClient.getFixtures(
-                    apiKey,
-                    filter.league(),
-                    filter.team(),
-                    season,
-                    filter.date(),
-                    statusCode
-            );
-        } catch (FeignException ex) {
-            log.error("FeignException llamando a api-football — status={}, body={}",
-                    ex.status(), ex.contentUTF8());
-            throw new ExternalApiException(
-                    "Error al obtener partidos de la API externa: " + ex.status(), ex
-            );
-        }
-    }
-
-
     // Enriquecimiento con logo de ms-teams (fallback)
 
     /**
@@ -141,7 +171,7 @@ public class FixtureServiceImpl implements FixtureService {
         String homeLogo = resolveLogoWithFallback(entry.teams().home().id(), homeLogoFromFixture);
         String awayLogo = resolveLogoWithFallback(entry.teams().away().id(), awayLogoFromFixture);
 
-        return fixtureMapper.toResponse(entry, homeLogo, awayLogo);
+        return fixtureMapper.toSummaryResponse(entry, homeLogo, awayLogo);
     }
 
     /**

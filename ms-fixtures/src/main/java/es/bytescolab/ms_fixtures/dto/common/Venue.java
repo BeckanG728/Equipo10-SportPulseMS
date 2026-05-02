@@ -1,4 +1,4 @@
-package es.bytescolab.ms_fixtures.dto.response;
+package es.bytescolab.ms_fixtures.dto.common;
 
 public record Venue(
         String name,

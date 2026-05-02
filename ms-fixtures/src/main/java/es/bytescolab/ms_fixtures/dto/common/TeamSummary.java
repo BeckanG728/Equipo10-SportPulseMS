@@ -1,6 +1,6 @@
-package es.bytescolab.ms_fixtures.dto.response;
+package es.bytescolab.ms_fixtures.dto.common;
 
-public record TeamFixture(
+public record TeamSummary(
         Integer id,
         String name,
         String logo,
